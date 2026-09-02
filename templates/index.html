@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>DDoS Security Monitor</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+<header class="topbar">
+  <div>
+    <div class="eyebrow">NETWORK SECURITY / AI TRAFFIC MONITOR</div>
+    <h1>DDoS Security Monitor</h1>
+    <p class="subtitle">Machine-learning based traffic classification and defensive monitoring</p>
+  </div>
+
+  <div class="header-right">
+    <div class="active-model">
+      <span>ACTIVE MODEL</span>
+      <strong id="activeModel">{{ active_model }}</strong>
+    </div>
+    <div id="modelBadge" class="badge {% if model_ready %}ready{% endif %}">
+      {% if model_ready %}MODELS ONLINE{% else %}MODELS NOT LOADED{% endif %}
+    </div>
+  </div>
+</header>
+
+<main class="container">
+
+  <!-- Top statistics -->
+  <section class="status-grid">
+    <article class="card stat-card">
+      <span class="label">Traffic Events</span>
+      <strong id="total">0</strong>
+      <small>processed</small>
+    </article>
+
+    <article class="card stat-card">
+      <span class="label">DDoS Detections</span>
+      <strong id="ddos" class="danger-number">0</strong>
+      <small>detected attacks</small>
+    </article>
+
+    <article class="card stat-card">
+      <span class="label">Benign Events</span>
+      <strong id="benign">0</strong>
+      <small>normal traffic</small>
+    </article>
+
+    <article class="card stat-card">
+      <span class="label">Last Confidence</span>
+      <strong id="confidence">0%</strong>
+      <small>latest prediction</small>
+    </article>
+  </section>
+
+  <!-- Current detection + model control -->
+  <section class="main-grid">
+
+    <article class="card prediction-card">
+      <div class="card-header">
+        <div>
+          <h2>Current Detection</h2>
+          <span class="small">Latest traffic classification</span>
+        </div>
+        <span id="currentModelTag" class="model-tag">{{ active_model }}</span>
+      </div>
+
+      <div id="currentState" class="state neutral">WAITING FOR TRAFFIC</div>
+
+      <div class="confidence-row">
+        <div class="meter">
+          <div id="meterFill"></div>
+        </div>
+        <span id="meterText">0%</span>
+      </div>
+
+      <div class="current-details">
+        <div>
+          <span>Source IP</span>
+          <b id="currentIp">—</b>
+        </div>
+        <div>
+          <span>Action</span>
+          <b id="currentAction">—</b>
+        </div>
+        <div>
+          <span>Time</span>
+          <b id="currentTime">—</b>
+        </div>
+      </div>
+    </article>
+
+    <article class="card">
+      <div class="card-header">
+        <div>
+          <h2>Model Control</h2>
+          <span class="small">Switch the classifier used for prediction</span>
+        </div>
+      </div>
+
+      <label class="select-label" for="modelSelect">Active Classifier</label>
+      <select id="modelSelect" class="model-select">
+        {% for model in available_models %}
+          <option value="{{ model }}" {% if model == active_model %}selected{% endif %}>
+            {{ model }}
+          </option>
+        {% endfor %}
+      </select>
+
+      <div class="model-info">
+        <div><span>Classifier</span><b id="classifierName">{{ active_model }}</b></div>
+        <div><span>Features</span><b>{{ feature_count }}</b></div>
+        <div><span>Classes</span><b>BENIGN / DDoS</b></div>
+        <div><span>Block Threshold</span><b>90%</b></div>
+      </div>
+
+      <div id="switchStatus" class="switch-status">Ready</div>
+    </article>
+  </section>
+
+  <!-- Model comparison -->
+  <section class="card">
+    <div class="card-header">
+      <div>
+        <h2>Model Comparison</h2>
+        <span class="small">Performance on the test dataset</span>
+      </div>
+      <span class="small">Higher is better</span>
+    </div>
+
+    <div class="comparison-grid" id="modelComparison">
+      <!-- Filled by dashboard.js -->
+    </div>
+  </section>
+
+  <!-- Detection history -->
+  <section class="card">
+    <div class="card-header">
+      <div>
+        <h2>Detection History</h2>
+        <span class="small">Latest traffic events</span>
+      </div>
+      <span id="historyCount" class="small">0 events</span>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Source</th>
+            <th>Model</th>
+            <th>Prediction</th>
+            <th>Confidence</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="events"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Application block list -->
+  <section class="card">
+    <div class="card-header">
+      <div>
+        <h2>Application Block List</h2>
+        <span class="small">Detected sources blocked at application level</span>
+      </div>
+      <span class="warning-note">Demo only — no OS firewall changes</span>
+    </div>
+
+    <div id="blocked" class="blocked-list">No blocked sources.</div>
+  </section>
+
+</main>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+</body>
+</html>
